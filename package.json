@@ -1,0 +1,16 @@
+{
+  "name": "skills",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A growing collection of reusable Agent Skills following the agentskills.io specification.",
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate-skills.js",
+    "index": "node scripts/generate-index.js",
+    "index:check": "node scripts/generate-index.js --check"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}
