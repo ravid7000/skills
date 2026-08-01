@@ -18,6 +18,12 @@ This repository stores reusable [Agent Skills](https://agentskills.io/specificat
 - You're editing an existing skill's frontmatter or structure
 - You're reviewing a PR that adds or changes a skill and need a checklist
 
+**Do not use for:**
+
+- Writing the subject-matter content of a skill — this covers the packaging (layout, frontmatter, validation workflow), not the domain expertise the skill itself teaches
+- Installing or consuming skills in an agent tool — see [README.md](../../README.md) for where each tool loads skill directories from
+- Editing Markdown elsewhere in the repo that isn't a `SKILL.md`
+
 ## Directory Layout
 
 ```
