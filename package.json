@@ -1,6 +1,6 @@
 {
   "name": "@ravid7000/skills",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A growing collection of reusable Agent Skills following the agentskills.io specification.",
   "keywords": [
     "agent-skills",
