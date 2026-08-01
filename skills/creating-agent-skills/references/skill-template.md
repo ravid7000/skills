@@ -7,6 +7,8 @@ Copy the block below into `skills/<your-skill-name>/SKILL.md` and fill in every 
 name: your-skill-name
 description: Use when <specific triggering situations, symptoms, or tasks>. <Add more concrete keywords an agent might search for.>
 license: MIT
+metadata:
+  category: <meta | research | workflow | diagnostics | maintenance>
 ---
 
 # Your Skill Title
@@ -17,7 +19,15 @@ license: MIT
 
 ## When to Use
 
-<!-- Bullet list of concrete situations/symptoms. Include what NOT to use it for if relevant. -->
+<!-- Bullet list of concrete situations/symptoms. -->
+
+- ...
+- ...
+
+**Do not use for:**
+
+<!-- Required. Where another skill or plain judgement is the better fit. Name
+     overlapping sibling skills explicitly, and only ones that actually exist. -->
 
 - ...
 - ...
