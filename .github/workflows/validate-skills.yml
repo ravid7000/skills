@@ -22,3 +22,35 @@ jobs:
 
       - name: Check README skills index is up to date
         run: npm run index:check
+
+  changeset:
+    name: changeset
+    # Only shipped content needs release notes, and the version PR is generated
+    # from changesets rather than adding one.
+    if: github.event_name == 'pull_request' && github.head_ref != 'changeset-release/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require a changeset when skills/ changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ -z "$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- skills/)" ]; then
+            echo "No changes under skills/ — no changeset needed."
+            exit 0
+          fi
+
+          added="$(git diff --name-only --diff-filter=A "$BASE_SHA" "$HEAD_SHA" -- '.changeset/*.md' \
+            | grep -v '\.changeset/README\.md$' || true)"
+
+          if [ -z "$added" ]; then
+            echo "::error::This PR changes skills/ but adds no changeset. Run 'npx changeset', pick a bump type, and commit the generated file. See .changeset/README.md for which bump to pick."
+            exit 1
+          fi
+
+          echo "Found changeset(s):"
+          echo "$added"
