@@ -26,9 +26,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing (OIDC) needs npm >= 11.5.1. Older npm doesn't just
+      # fail the exchange, it never attempts it and falls back to looking for a
+      # token, so the failure looks like a missing secret rather than a version
+      # problem. Node 24 already ships a new enough npm; this pins the thing
+      # that actually gates the feature.
+      - run: npm install -g npm@latest
 
       - run: npm ci
 
