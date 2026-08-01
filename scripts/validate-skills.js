@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+// Validates every skill under skills/ against the agentskills.io SKILL.md spec:
+// https://agentskills.io/specification
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import matter from 'gray-matter';
+
+const SKILLS_DIR = join(process.cwd(), 'skills');
+const NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const MAX_NAME_LEN = 64;
+const MAX_DESCRIPTION_LEN = 1024;
+const MAX_COMPATIBILITY_LEN = 500;
+const RECOMMENDED_MAX_BODY_LINES = 500;
+
+function listSkillDirs() {
+  if (!existsSync(SKILLS_DIR)) return [];
+  return readdirSync(SKILLS_DIR)
+    .filter((entry) => statSync(join(SKILLS_DIR, entry)).isDirectory())
+    .sort();
+}
+
+function validateSkill(dirName) {
+  const errors = [];
+  const warnings = [];
+  const skillPath = join(SKILLS_DIR, dirName);
+  const skillMdPath = join(skillPath, 'SKILL.md');
+
+  if (!existsSync(skillMdPath)) {
+    return { dirName, errors: [`Missing required SKILL.md file at skills/${dirName}/SKILL.md`], warnings };
+  }
+
+  const raw = readFileSync(skillMdPath, 'utf8');
+  let parsed;
+  try {
+    parsed = matter(raw);
+  } catch (err) {
+    return { dirName, errors: [`Failed to parse YAML frontmatter: ${err.message}`], warnings };
+  }
+
+  const data = parsed.data || {};
+
+  // name
+  if (!data.name) {
+    errors.push('Frontmatter is missing required field "name"');
+  } else if (typeof data.name !== 'string') {
+    errors.push('Frontmatter field "name" must be a string');
+  } else {
+    if (data.name.length > MAX_NAME_LEN) {
+      errors.push(`Frontmatter field "name" must be at most ${MAX_NAME_LEN} characters (got ${data.name.length})`);
+    }
+    if (!NAME_RE.test(data.name)) {
+      errors.push(
+        `Frontmatter field "name" ("${data.name}") must contain only lowercase letters, numbers, and single hyphens, and must not start/end with a hyphen`
+      );
+    }
+    if (data.name !== dirName) {
+      errors.push(`Frontmatter field "name" ("${data.name}") must match its parent directory name ("${dirName}")`);
+    }
+  }
+
+  // description
+  if (!data.description) {
+    errors.push('Frontmatter is missing required field "description"');
+  } else if (typeof data.description !== 'string') {
+    errors.push('Frontmatter field "description" must be a string');
+  } else if (data.description.trim().length === 0) {
+    errors.push('Frontmatter field "description" must not be empty');
+  } else if (data.description.length > MAX_DESCRIPTION_LEN) {
+    errors.push(
+      `Frontmatter field "description" must be at most ${MAX_DESCRIPTION_LEN} characters (got ${data.description.length})`
+    );
+  }
+
+  // optional: license
+  if (data.license !== undefined && typeof data.license !== 'string') {
+    errors.push('Frontmatter field "license", when present, must be a string');
+  }
+
+  // optional: compatibility
+  if (data.compatibility !== undefined) {
+    if (typeof data.compatibility !== 'string') {
+      errors.push('Frontmatter field "compatibility", when present, must be a string');
+    } else if (data.compatibility.length > MAX_COMPATIBILITY_LEN) {
+      errors.push(
+        `Frontmatter field "compatibility" must be at most ${MAX_COMPATIBILITY_LEN} characters (got ${data.compatibility.length})`
+      );
+    }
+  }
+
+  // optional: allowed-tools
+  const allowedTools = data['allowed-tools'];
+  if (allowedTools !== undefined && typeof allowedTools !== 'string') {
+    errors.push('Frontmatter field "allowed-tools", when present, must be a space-separated string');
+  }
+
+  // optional: metadata
+  if (data.metadata !== undefined) {
+    if (typeof data.metadata !== 'object' || data.metadata === null || Array.isArray(data.metadata)) {
+      errors.push('Frontmatter field "metadata", when present, must be a key-value mapping');
+    } else {
+      for (const [key, value] of Object.entries(data.metadata)) {
+        if (typeof value !== 'string') {
+          errors.push(`Frontmatter field "metadata.${key}" must be a string (got ${typeof value})`);
+        }
+      }
+    }
+  }
+
+  // body length (soft warning per spec's progressive disclosure guidance)
+  const bodyLines = parsed.content.split('\n').length;
+  if (bodyLines > RECOMMENDED_MAX_BODY_LINES) {
+    warnings.push(
+      `SKILL.md body is ${bodyLines} lines; the spec recommends keeping it under ${RECOMMENDED_MAX_BODY_LINES} lines and moving detail to references/`
+    );
+  }
+
+  return { dirName, errors, warnings };
+}
+
+function main() {
+  const dirs = listSkillDirs();
+
+  if (dirs.length === 0) {
+    console.log('No skills found under skills/. Nothing to validate.');
+    return;
+  }
+
+  let hasErrors = false;
+
+  for (const dirName of dirs) {
+    const { errors, warnings } = validateSkill(dirName);
+
+    if (errors.length === 0 && warnings.length === 0) {
+      console.log(`OK    skills/${dirName}`);
+      continue;
+    }
+
+    if (errors.length > 0) {
+      hasErrors = true;
+      console.log(`FAIL  skills/${dirName}`);
+      for (const error of errors) console.log(`      error: ${error}`);
+    } else {
+      console.log(`WARN  skills/${dirName}`);
+    }
+    for (const warning of warnings) console.log(`      warning: ${warning}`);
+  }
+
+  console.log('');
+  if (hasErrors) {
+    console.error(`Validation failed for ${dirs.length} skill(s) checked.`);
+    process.exit(1);
+  }
+
+  console.log(`Validated ${dirs.length} skill(s) successfully.`);
+}
+
+main();
