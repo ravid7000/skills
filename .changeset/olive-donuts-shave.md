@@ -1,5 +1,5 @@
 ---
-"@ravid7000/skills": patch
+"@ravid7000/skills": minor
 ---
 
 First published release. Ships three skills:
