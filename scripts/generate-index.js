@@ -29,15 +29,16 @@ function buildTable() {
   const rows = dirs.map((dirName) => {
     const skillMdPath = join(SKILLS_DIR, dirName, 'SKILL.md');
     if (!existsSync(skillMdPath)) {
-      return `| \`${dirName}\` | _(missing SKILL.md)_ |`;
+      return `| \`${dirName}\` | — | _(missing SKILL.md)_ |`;
     }
     const { data } = matter(readFileSync(skillMdPath, 'utf8'));
     const name = data.name || dirName;
+    const category = data.metadata?.category || '—';
     const description = (data.description || '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
-    return `| [\`${name}\`](skills/${dirName}) | ${description} |`;
+    return `| [\`${name}\`](skills/${dirName}) | \`${category}\` | ${description} |`;
   });
 
-  return ['| Skill | Description |', '| --- | --- |', ...rows].join('\n');
+  return ['| Skill | Category | Description |', '| --- | --- | --- |', ...rows].join('\n');
 }
 
 function main() {
