@@ -1,52 +1,111 @@
-# Skills
+# Agent Skills for Engineering
 
-A growing collection of reusable [Agent Skills](https://agentskills.io/specification) — self-contained instructions that coding agents (Claude Code, Cursor, and other compatible tools) can load on demand to perform a task well.
+**Reusable [Agent Skills](https://agentskills.io/specification) for Claude Code, Cursor, Codex, Copilot, and 70+ other AI coding agents.** Drop-in instructions that make an agent research properly, instrument what it ships, and write skills that actually load.
 
-## What's a Skill?
+[![npm](https://img.shields.io/npm/v/@ravid7000/skills?color=cb3837&logo=npm)](https://www.npmjs.com/package/@ravid7000/skills)
+[![CI](https://img.shields.io/github/actions/workflow/status/ravid7000/skills/validate-skills.yml?branch=master&label=validate)](https://github.com/ravid7000/skills/actions/workflows/validate-skills.yml)
+[![license](https://img.shields.io/npm/l/@ravid7000/skills)](https://github.com/ravid7000/skills/blob/master/LICENSE)
 
-A skill is a directory containing a `SKILL.md` file with YAML frontmatter (`name`, `description`, and a few optional fields) followed by Markdown instructions. Agents read the `name`/`description` of every skill up front, and load the full body only when a task matches. See the [specification](https://agentskills.io/specification) for the full format.
+## Install
+
+```bash
+npx skills add ravid7000/skills
+```
+
+That's it — the CLI detects your agent and installs there. Pick a single skill, or target specific agents:
+
+```bash
+npx skills add ravid7000/skills --skill finder      # just one
+npx skills add ravid7000/skills --list              # look before installing
+npx skills add ravid7000/skills -g                  # user-wide instead of this project
+```
+
+Prefer versioned installs, or using [agent-skills-cli](https://www.npmjs.com/package/agent-skills-cli)? See [all installation options](#all-installation-options).
+
+## Skills
+
+<!-- SKILLS_INDEX_START -->
+| Skill | What it does |
+| --- | --- |
+| [**creating-agent-skills**](#creating-agent-skills) | Authors and validates new skills so they load reliably and survive review. |
+| [**finder**](#finder) | Answers research questions from current, cited sources instead of model memory. |
+| [**instrumenting-for-observability**](#instrumenting-for-observability) | Adds logging, metrics, and tracing designed backwards from the questions an outage will ask. |
+
+### creating-agent-skills
+
+`meta` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/creating-agent-skills)
+
+Authors and validates new skills so they load reliably and survive review.
+
+```bash
+npx skills add ravid7000/skills --skill creating-agent-skills
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when adding a new skill to this repository, editing an existing skill, or reviewing a skill contribution before merging. Covers the required SKILL.md layout, frontmatter fields, naming rules, and the validate/index workflow.
+
+</details>
+
+### finder
+
+`research` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/finder)
+
+Answers research questions from current, cited sources instead of model memory.
+
+```bash
+npx skills add ravid7000/skills --skill finder
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when an engineer needs researched, sourced, up-to-date information rather than an answer from model memory — e.g. "research best practices for X", "investigate this issue/bug", "find out how the community/industry handles Y", "what does the official documentation say about Z". Triggers on requests to research, investigate, or find authoritative information on a topic, library, API, error message, or design decision.
+
+</details>
+
+### instrumenting-for-observability
+
+`diagnostics` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/instrumenting-for-observability)
+
+Adds logging, metrics, and tracing designed backwards from the questions an outage will ask.
+
+```bash
+npx skills add ravid7000/skills --skill instrumenting-for-observability
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when a new or changed feature, endpoint, background job, or client-side flow is about to ship and needs logging, metrics, or tracing — or when reviewing whether a change would be diagnosable once it's running in production. Triggers on "add observability", "add logging/metrics/telemetry", "instrument this", "how will we know if this breaks", "we had no data during that incident", or a post-incident finding that a failure was invisible.
+
+</details>
+<!-- SKILLS_INDEX_END -->
+
+## What is an Agent Skill?
+
+A skill is a folder with a `SKILL.md` file: YAML frontmatter naming the skill and describing when to use it, followed by Markdown instructions. Your agent reads every skill's name and description up front, and loads the full body only when a task matches — so a dozen installed skills cost almost nothing until one is actually needed.
+
+They're portable across tools, because the format is an [open specification](https://agentskills.io/specification) rather than any one vendor's feature.
 
 ```
 skills/
   skill-name/
-    SKILL.md              # required: frontmatter + instructions
-    scripts/               # optional: executable helpers
-    references/            # optional: detailed docs loaded on demand
-    assets/                 # optional: templates, images, data
+    SKILL.md        # required: frontmatter + instructions
+    references/     # optional: detail loaded only when needed
+    scripts/        # optional: executable helpers
 ```
 
-## Available Skills
+## All installation options
 
-<!-- SKILLS_INDEX_START -->
-| Skill | Category | Description |
-| --- | --- | --- |
-| [`creating-agent-skills`](skills/creating-agent-skills) | `meta` | Use when adding a new skill to this repository, editing an existing skill, or reviewing a skill contribution before merging. Covers the required SKILL.md layout, frontmatter fields, naming rules, and the validate/index workflow. |
-| [`finder`](skills/finder) | `research` | Use when an engineer needs researched, sourced, up-to-date information rather than an answer from model memory — e.g. "research best practices for X", "investigate this issue/bug", "find out how the community/industry handles Y", "what does the official documentation say about Z". Triggers on requests to research, investigate, or find authoritative information on a topic, library, API, error message, or design decision. |
-| [`instrumenting-for-observability`](skills/instrumenting-for-observability) | `diagnostics` | Use when a new or changed feature, endpoint, background job, or client-side flow is about to ship and needs logging, metrics, or tracing — or when reviewing whether a change would be diagnosable once it's running in production. Triggers on "add observability", "add logging/metrics/telemetry", "instrument this", "how will we know if this breaks", "we had no data during that incident", or a post-incident finding that a failure was invisible. |
-<!-- SKILLS_INDEX_END -->
+### Other CLIs
 
-This table is generated from each skill's frontmatter — do not edit it by hand. Run `npm run index` to regenerate it after adding or editing a skill.
-
-Every skill declares one category from a closed set — `meta`, `research`, `workflow`, `diagnostics`, or `maintenance` — enforced by `npm run validate`. See [Categories](skills/creating-agent-skills/SKILL.md#categories) for what each covers and how to propose a new one.
-
-## Installing These Skills
-
-### With a skills CLI (recommended)
-
-Either of the two common CLIs can install straight from this repository, and both resolve skills from the standard `skills/*/SKILL.md` layout — supporting files in `references/` come along with the skill.
+[`agent-skills-cli`](https://www.npmjs.com/package/agent-skills-cli) is an alternative to `npx skills`, adding search, conflict detection, and private registry support:
 
 ```bash
-# npx skills — no install needed, supports ~70 agents
-npx skills add ravid7000/skills                                    # pick interactively
-npx skills add ravid7000/skills --skill instrumenting-for-observability
-npx skills add ravid7000/skills --list                             # just look
-
-# agent-skills-cli — global install, adds search/doctor/private registries
 npm install -g agent-skills-cli
 skills add ravid7000/skills -a claude,cursor
 ```
 
-Both default to installing into the current project and accept `-g` for a user-wide install. `npx skills` symlinks by default (pass `--copy` to copy instead), which is useful if you want repo updates to apply automatically.
+Both CLIs read the standard `skills/*/SKILL.md` layout, and supporting files in `references/` come along with each skill. `npx skills` symlinks by default — pass `--copy` if you'd rather have independent copies.
 
 ### From npm
 
@@ -71,31 +130,22 @@ ln -s /path/to/this/repo/skills/finder ~/.claude/skills/finder
 
 Common locations are `~/.claude/skills/` or `.claude/skills/` for Claude Code and `~/.cursor/skills/` or `.agents/skills/` for Cursor. Paths move between versions, so check your tool's current docs — or let one of the CLIs above work it out for you.
 
-## Adding a New Skill
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, or read the [`creating-agent-skills`](skills/creating-agent-skills/SKILL.md) skill itself — it documents its own creation process.
-
-Quick version:
+## Contributing a skill
 
 ```bash
 npm install
 mkdir skills/your-skill-name
 cp skills/creating-agent-skills/references/skill-template.md skills/your-skill-name/SKILL.md
-# edit skills/your-skill-name/SKILL.md
-npm run validate
-npm run index
+# write it, then:
+npm run validate     # frontmatter, required sections, category
+npm run index        # regenerates the Skills section above
+npx changeset        # release note for the change
 ```
 
-## Validation
+Every skill is validated in CI, declares one category from a closed set (`meta`, `research`, `workflow`, `diagnostics`, `maintenance`), and must say both when to use it and when not to. The Skills section above is generated from frontmatter — don't edit it by hand.
 
-This repo validates every skill's frontmatter against the spec on every push/PR via GitHub Actions. Run the same checks locally:
-
-```bash
-npm install
-npm run validate     # checks frontmatter format/required fields for every skill
-npm run index:check  # verifies the README skills table above is up to date
-```
+Full guide in [CONTRIBUTING.md](https://github.com/ravid7000/skills/blob/master/CONTRIBUTING.md), or read the [`creating-agent-skills`](https://github.com/ravid7000/skills/blob/master/skills/creating-agent-skills/SKILL.md) skill, which documents its own creation process.
 
 ## License
 
-[MIT](LICENSE) unless a skill's own frontmatter specifies otherwise.
+[MIT](https://github.com/ravid7000/skills/blob/master/LICENSE) unless a skill's own frontmatter specifies otherwise.

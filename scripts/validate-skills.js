@@ -17,6 +17,11 @@ const RECOMMENDED_MAX_BODY_LINES = 500;
 // surfaces in review instead of drifting skill by skill.
 const ALLOWED_CATEGORIES = ['meta', 'research', 'workflow', 'diagnostics', 'maintenance'];
 
+// `description` is written for agents deciding whether to load a skill, so it's
+// long and trigger-shaped. `tagline` is the human-facing one-liner used on the
+// README and npm page, where that copy reads terribly.
+const MAX_TAGLINE_LEN = 120;
+
 // Every skill must say when to reach for it and when to reach for something
 // else. The exclusion check is content-based rather than heading-based so that
 // either a "## Do not use for" heading or an inline "**Do not use for:**" line
@@ -128,6 +133,25 @@ function validateSkill(dirName) {
       errors.push(
         `Frontmatter field "metadata.category" ("${category}") is not an allowed category. Must be one of: ${ALLOWED_CATEGORIES.join(', ')}. To add a new category, update ALLOWED_CATEGORIES in scripts/validate-skills.js and document it in skills/creating-agent-skills/SKILL.md`
       );
+    }
+
+    const tagline = data.metadata.tagline;
+    if (tagline === undefined) {
+      errors.push(
+        'Frontmatter is missing "metadata.tagline" (repo policy). Write one plain sentence describing what the skill does, for humans reading the README and npm page'
+      );
+    } else if (typeof tagline === 'string') {
+      if (tagline.trim().length === 0) {
+        errors.push('Frontmatter field "metadata.tagline" must not be empty');
+      } else if (tagline.length > MAX_TAGLINE_LEN) {
+        errors.push(
+          `Frontmatter field "metadata.tagline" must be at most ${MAX_TAGLINE_LEN} characters (got ${tagline.length}) — it needs to stay scannable in a list`
+        );
+      } else if (/^use when/i.test(tagline.trim())) {
+        errors.push(
+          'Frontmatter field "metadata.tagline" should describe what the skill does, not when to use it — that\'s what "description" is for'
+        );
+      }
     }
   }
 

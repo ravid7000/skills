@@ -9,6 +9,7 @@ For the full walkthrough (with a copy-paste template), read the [`creating-agent
 - [ ] Directory name and frontmatter `name` match exactly, use only lowercase letters/numbers/hyphens, no leading/trailing/consecutive hyphens
 - [ ] `description` explains **what** the skill does and **when** to use it, starts with "Use when..." where possible, and doesn't summarize the internal steps
 - [ ] `metadata.category` is set to one of `meta`, `research`, `workflow`, `diagnostics`, `maintenance` (repo policy — see the [Categories](skills/creating-agent-skills/SKILL.md#categories) table; adding a new value means editing `scripts/validate-skills.js` in the same PR)
+- [ ] `metadata.tagline` is one plain sentence (≤120 chars) on what the skill **does**, written for humans — it's the copy shown in the README and on the npm page, and it must not be a second copy of `description`
 - [ ] Body has a "When to Use" section **and** a "Do not use for" statement, naming any overlapping sibling skill by name
 - [ ] Body is focused and under ~500 lines; heavy reference material lives in `references/`, reusable code in `scripts/`
 - [ ] Ran `npm run validate` locally with no errors

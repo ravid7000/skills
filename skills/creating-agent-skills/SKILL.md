@@ -4,6 +4,7 @@ description: Use when adding a new skill to this repository, editing an existing
 license: MIT
 metadata:
   category: meta
+  tagline: Authors and validates new skills so they load reliably and survive review.
 ---
 
 # Creating Agent Skills
@@ -42,7 +43,7 @@ Skills live in a **flat namespace** directly under `skills/` — no nested categ
 1. **Pick a name.** Lowercase letters, numbers, and single hyphens only; no leading/trailing hyphen; verb-first / gerund style reads best (e.g. `writing-migrations`, not `migration-helper`). This exact string becomes both the directory name and the `name:` frontmatter value — they must match.
 2. **Create the directory:** `skills/<your-skill-name>/`.
 3. **Copy the template** from [`references/skill-template.md`](references/skill-template.md) into `skills/<your-skill-name>/SKILL.md` and fill it in.
-4. **Write the frontmatter** (see field reference below). `name`, `description`, and `metadata.category` are required.
+4. **Write the frontmatter** (see field reference below). `name`, `description`, `metadata.category`, and `metadata.tagline` are required.
 5. **Write the body.** Keep it under ~500 lines; move heavy reference material into `references/*.md` and reusable code into `scripts/`. Link to them with relative paths. It must include a "When to Use" section and a "Do not use for" statement.
 6. **Validate:** run `npm install` (once) then `npm run validate`.
 7. **Update the index:** run `npm run index` to regenerate the skills table in [README.md](../../README.md), and commit the result.
@@ -56,7 +57,7 @@ Skills live in a **flat namespace** directly under `skills/` — no nested categ
 | `description` | Yes | Max 1024 chars. Describe both *what* the skill does and *when* to use it; front-load "Use when..." plus concrete keywords/symptoms |
 | `license` | No | License name, e.g. `MIT` |
 | `compatibility` | No | Max 500 chars. Only add if the skill needs a specific environment (tools, network access, a particular agent product) |
-| `metadata` | Yes (repo policy) | Free-form string-to-string map per the spec, but this repo requires a `category` key drawn from the list below. Other keys (e.g. `version`) are optional |
+| `metadata` | Yes (repo policy) | Free-form string-to-string map per the spec, but this repo requires `category` (from the list below) and `tagline` (see next section). Other keys are optional |
 | `allowed-tools` | No | Space-separated list of pre-approved tools (experimental) |
 
 ## Categories
@@ -72,6 +73,28 @@ Every skill declares exactly one `metadata.category`. The vocabulary is closed a
 | `maintenance` | Changing existing code safely |
 
 Requiring this field is **repo policy**, not part of the [agentskills.io specification](https://agentskills.io/specification), which treats `metadata` as free-form. If none of the five fits, that's a signal worth discussing in the PR — add the new value to `ALLOWED_CATEGORIES` in [`scripts/validate-skills.js`](../../scripts/validate-skills.js) and document it in the table above, so growing the vocabulary is a visible decision rather than a silent one.
+
+## Tagline vs. Description
+
+Every skill carries two summaries, written for different readers. Getting them confused produces either an unreadable README or a skill agents fail to load.
+
+| Field | Reader | Shape |
+| --- | --- | --- |
+| `description` | An agent deciding whether to load the skill | Long, trigger-shaped, starts with "Use when...", packed with keywords |
+| `metadata.tagline` | A human scanning the README or npm page | One plain sentence, ≤120 chars, says what the skill *does* |
+
+```yaml
+# Good
+tagline: Answers research questions from current, cited sources instead of model memory.
+
+# Bad — this is a description, not a tagline
+tagline: Use when an engineer needs researched, sourced information rather than...
+
+# Bad — says nothing
+tagline: A helpful research skill.
+```
+
+Validation rejects a tagline that starts with "Use when", since that's the signal the two got swapped. The README's Skills section is generated from taglines, so this is the copy that sells the skill — write it like a product one-liner, in the present tense, leading with the verb.
 
 ## Declaring When *Not* to Use a Skill
 
@@ -108,7 +131,7 @@ npm run index       # regenerates the README skills table
 npm run index:check # verifies the table is up to date without writing (used in CI)
 ```
 
-`npm run validate` checks, per skill: required fields present, `name` format/length/directory match, `description` length, `metadata.category` present and drawn from the allowed vocabulary, the presence of "When to Use" and "Do not use for" in the body, correct types for optional fields, and warns if the body exceeds ~500 lines.
+`npm run validate` checks, per skill: required fields present, `name` format/length/directory match, `description` length, `metadata.category` present and drawn from the allowed vocabulary, `metadata.tagline` present and within length (and not a description in disguise), the presence of "When to Use" and "Do not use for" in the body, correct types for optional fields, and warns if the body exceeds ~500 lines.
 
 ## Common Mistakes
 
@@ -120,6 +143,8 @@ npm run index:check # verifies the table is up to date without writing (used in 
 | Forgetting to run `npm run index` after adding a skill | CI's `index:check` will fail the PR — run it locally and commit the diff |
 | Dumping a 1000-line reference doc straight into `SKILL.md` | Move it to `references/` and link to it |
 | Inventing a new `metadata.category` value ad hoc | Pick one of the five, or propose adding one by editing `ALLOWED_CATEGORIES` and the Categories table together |
+| Reusing the description as the tagline | The tagline is human-facing copy — one sentence on what the skill does |
+| Hand-editing the Skills section of the README | It's generated from taglines; run `npm run index` |
 | Listing only when to use the skill | Add a "Do not use for" statement too; validation requires it |
 | Cross-referencing a skill that doesn't exist (or was renamed) | Only name skills present under `skills/` |
 

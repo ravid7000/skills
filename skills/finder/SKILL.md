@@ -5,6 +5,7 @@ license: MIT
 compatibility: Works best with a host that provides web search/fetch tools and can launch parallel sub-agents/tasks. Falls back to a single sequential session if sub-agent spawning isn't available; requires at least a web search/fetch tool to be useful at all.
 metadata:
   category: research
+  tagline: Answers research questions from current, cited sources instead of model memory.
 ---
 
 # Finder
