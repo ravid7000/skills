@@ -29,19 +29,47 @@ This table is generated from each skill's frontmatter — do not edit it by hand
 
 Every skill declares one category from a closed set — `meta`, `research`, `workflow`, `diagnostics`, or `maintenance` — enforced by `npm run validate`. See [Categories](skills/creating-agent-skills/SKILL.md#categories) for what each covers and how to propose a new one.
 
-## Using These Skills
+## Installing These Skills
 
-Skills are consumed by copying or symlinking a skill's folder into the location your agent tool loads skills from, for example:
+### With a skills CLI (recommended)
 
-- **Claude Code:** `~/.claude/skills/<skill-name>` (personal) or `.claude/skills/<skill-name>` (per-project)
-- **Cursor:** `.cursor/skills/<skill-name>` (per-project) — check your Cursor version's docs for the current expected path
-- Other tools that support the `agentskills.io` spec: consult that tool's docs for where it looks for skill directories
-
-A simple way to pull in one or more skills without duplicating files is a symlink, e.g.:
+Either of the two common CLIs can install straight from this repository, and both resolve skills from the standard `skills/*/SKILL.md` layout — supporting files in `references/` come along with the skill.
 
 ```bash
-ln -s /path/to/this/repo/skills/creating-agent-skills ~/.claude/skills/creating-agent-skills
+# npx skills — no install needed, supports ~70 agents
+npx skills add ravid7000/skills                                    # pick interactively
+npx skills add ravid7000/skills --skill instrumenting-for-observability
+npx skills add ravid7000/skills --list                             # just look
+
+# agent-skills-cli — global install, adds search/doctor/private registries
+npm install -g agent-skills-cli
+skills add ravid7000/skills -a claude,cursor
 ```
+
+Both default to installing into the current project and accept `-g` for a user-wide install. `npx skills` symlinks by default (pass `--copy` to copy instead), which is useful if you want repo updates to apply automatically.
+
+### From npm
+
+This collection is also published as [`@ravid7000/skills`](https://www.npmjs.com/package/@ravid7000/skills), which gives you a pinnable, versioned release instead of tracking a branch:
+
+```bash
+skills install npm:@ravid7000/skills          # latest
+skills install npm:@ravid7000/skills@0.1.0    # pinned
+```
+
+> **Note:** `npm:` sources are supported by `agent-skills-cli`, not by `npx skills`. If you use the latter, install from the GitHub source above.
+
+The published package contains only the `skills/` tree — the validation scripts and contributor docs stay in the repository.
+
+### Manually
+
+Skills are plain directories, so copying or symlinking one into wherever your agent loads skills from works fine:
+
+```bash
+ln -s /path/to/this/repo/skills/finder ~/.claude/skills/finder
+```
+
+Common locations are `~/.claude/skills/` or `.claude/skills/` for Claude Code and `~/.cursor/skills/` or `.agents/skills/` for Cursor. Paths move between versions, so check your tool's current docs — or let one of the CLIs above work it out for you.
 
 ## Adding a New Skill
 
