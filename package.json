@@ -1,15 +1,38 @@
 {
-  "name": "skills",
-  "version": "1.0.0",
-  "private": true,
+  "name": "@ravid7000/skills",
+  "version": "0.1.0",
   "description": "A growing collection of reusable Agent Skills following the agentskills.io specification.",
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "skill",
+    "ai-agent",
+    "coding-agent",
+    "claude-code",
+    "cursor",
+    "agentskills"
+  ],
+  "homepage": "https://github.com/ravid7000/skills#readme",
+  "bugs": "https://github.com/ravid7000/skills/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ravid7000/skills.git"
+  },
+  "license": "MIT",
   "type": "module",
+  "files": [
+    "skills"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "validate": "node scripts/validate-skills.js",
     "index": "node scripts/generate-index.js",
-    "index:check": "node scripts/generate-index.js --check"
+    "index:check": "node scripts/generate-index.js --check",
+    "prepublishOnly": "npm run validate && npm run index:check"
   },
-  "license": "MIT",
   "devDependencies": {
     "gray-matter": "^4.0.3"
   }
