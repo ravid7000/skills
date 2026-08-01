@@ -54,7 +54,7 @@ This collection is also published as [`@ravid7000/skills`](https://www.npmjs.com
 
 ```bash
 skills install npm:@ravid7000/skills          # latest
-skills install npm:@ravid7000/skills@0.1.0    # pinned
+skills install npm:@ravid7000/skills@0.0.1    # pinned
 ```
 
 > **Note:** `npm:` sources are supported by `agent-skills-cli`, not by `npx skills`. If you use the latter, install from the GitHub source above.
