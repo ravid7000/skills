@@ -33,7 +33,7 @@
     "index": "node scripts/generate-index.js",
     "index:check": "node scripts/generate-index.js --check",
     "changeset": "changeset",
-    "changeset:version": "changeset version",
+    "changeset:version": "changeset version && npm install --package-lock-only",
     "changeset:publish": "changeset publish",
     "prepublishOnly": "npm run validate && npm run index:check"
   },
