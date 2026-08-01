@@ -12,6 +12,18 @@ const MAX_DESCRIPTION_LEN = 1024;
 const MAX_COMPATIBILITY_LEN = 500;
 const RECOMMENDED_MAX_BODY_LINES = 500;
 
+// Repo policy, not part of the agentskills.io spec (which treats metadata as
+// free-form). Adding a category is a deliberate one-line change here so that it
+// surfaces in review instead of drifting skill by skill.
+const ALLOWED_CATEGORIES = ['meta', 'research', 'workflow', 'diagnostics', 'maintenance'];
+
+// Every skill must say when to reach for it and when to reach for something
+// else. The exclusion check is content-based rather than heading-based so that
+// either a "## Do not use for" heading or an inline "**Do not use for:**" line
+// inside "When to Use" satisfies it.
+const WHEN_TO_USE_RE = /^#{2,4}\s+when to use/im;
+const DO_NOT_USE_RE = /do not use\s+(this\s+skill\s+)?for/i;
+
 function listSkillDirs() {
   if (!existsSync(SKILLS_DIR)) return [];
   return readdirSync(SKILLS_DIR)
@@ -93,17 +105,40 @@ function validateSkill(dirName) {
     errors.push('Frontmatter field "allowed-tools", when present, must be a space-separated string');
   }
 
-  // optional: metadata
-  if (data.metadata !== undefined) {
-    if (typeof data.metadata !== 'object' || data.metadata === null || Array.isArray(data.metadata)) {
-      errors.push('Frontmatter field "metadata", when present, must be a key-value mapping');
-    } else {
-      for (const [key, value] of Object.entries(data.metadata)) {
-        if (typeof value !== 'string') {
-          errors.push(`Frontmatter field "metadata.${key}" must be a string (got ${typeof value})`);
-        }
+  // metadata: free-form per the spec, but this repo requires metadata.category
+  if (data.metadata === undefined) {
+    errors.push(
+      `Frontmatter is missing "metadata.category" (repo policy). Must be one of: ${ALLOWED_CATEGORIES.join(', ')}`
+    );
+  } else if (typeof data.metadata !== 'object' || data.metadata === null || Array.isArray(data.metadata)) {
+    errors.push('Frontmatter field "metadata", when present, must be a key-value mapping');
+  } else {
+    for (const [key, value] of Object.entries(data.metadata)) {
+      if (typeof value !== 'string') {
+        errors.push(`Frontmatter field "metadata.${key}" must be a string (got ${typeof value})`);
       }
     }
+
+    const category = data.metadata.category;
+    if (category === undefined) {
+      errors.push(
+        `Frontmatter is missing "metadata.category" (repo policy). Must be one of: ${ALLOWED_CATEGORIES.join(', ')}`
+      );
+    } else if (typeof category === 'string' && !ALLOWED_CATEGORIES.includes(category)) {
+      errors.push(
+        `Frontmatter field "metadata.category" ("${category}") is not an allowed category. Must be one of: ${ALLOWED_CATEGORIES.join(', ')}. To add a new category, update ALLOWED_CATEGORIES in scripts/validate-skills.js and document it in skills/creating-agent-skills/SKILL.md`
+      );
+    }
+  }
+
+  // required body sections
+  if (!WHEN_TO_USE_RE.test(parsed.content)) {
+    errors.push('SKILL.md body is missing a "When to Use" section');
+  }
+  if (!DO_NOT_USE_RE.test(parsed.content)) {
+    errors.push(
+      'SKILL.md body must state what NOT to use the skill for (e.g. a "Do not use for:" list), so overlapping skills stay distinguishable'
+    );
   }
 
   // body length (soft warning per spec's progressive disclosure guidance)

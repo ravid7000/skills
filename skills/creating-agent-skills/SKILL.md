@@ -18,6 +18,12 @@ This repository stores reusable [Agent Skills](https://agentskills.io/specificat
 - You're editing an existing skill's frontmatter or structure
 - You're reviewing a PR that adds or changes a skill and need a checklist
 
+**Do not use for:**
+
+- Writing the subject-matter content of a skill — this covers the packaging (layout, frontmatter, validation workflow), not the domain expertise the skill itself teaches
+- Installing or consuming skills in an agent tool — see [README.md](../../README.md) for where each tool loads skill directories from
+- Editing Markdown elsewhere in the repo that isn't a `SKILL.md`
+
 ## Directory Layout
 
 ```
@@ -36,8 +42,8 @@ Skills live in a **flat namespace** directly under `skills/` — no nested categ
 1. **Pick a name.** Lowercase letters, numbers, and single hyphens only; no leading/trailing hyphen; verb-first / gerund style reads best (e.g. `writing-migrations`, not `migration-helper`). This exact string becomes both the directory name and the `name:` frontmatter value — they must match.
 2. **Create the directory:** `skills/<your-skill-name>/`.
 3. **Copy the template** from [`references/skill-template.md`](references/skill-template.md) into `skills/<your-skill-name>/SKILL.md` and fill it in.
-4. **Write the frontmatter** (see field reference below). Only `name` and `description` are required.
-5. **Write the body.** Keep it under ~500 lines; move heavy reference material into `references/*.md` and reusable code into `scripts/`. Link to them with relative paths.
+4. **Write the frontmatter** (see field reference below). `name`, `description`, and `metadata.category` are required.
+5. **Write the body.** Keep it under ~500 lines; move heavy reference material into `references/*.md` and reusable code into `scripts/`. Link to them with relative paths. It must include a "When to Use" section and a "Do not use for" statement.
 6. **Validate:** run `npm install` (once) then `npm run validate`.
 7. **Update the index:** run `npm run index` to regenerate the skills table in [README.md](../../README.md), and commit the result.
 8. **Open a PR** — CI runs the same validate + index-check steps automatically.
@@ -50,8 +56,28 @@ Skills live in a **flat namespace** directly under `skills/` — no nested categ
 | `description` | Yes | Max 1024 chars. Describe both *what* the skill does and *when* to use it; front-load "Use when..." plus concrete keywords/symptoms |
 | `license` | No | License name, e.g. `MIT` |
 | `compatibility` | No | Max 500 chars. Only add if the skill needs a specific environment (tools, network access, a particular agent product) |
-| `metadata` | No | Free-form string-to-string map for extra properties (e.g. `category`, `version`) |
+| `metadata` | Yes (repo policy) | Free-form string-to-string map per the spec, but this repo requires a `category` key drawn from the list below. Other keys (e.g. `version`) are optional |
 | `allowed-tools` | No | Space-separated list of pre-approved tools (experimental) |
+
+## Categories
+
+Every skill declares exactly one `metadata.category`. The vocabulary is closed and enforced by `npm run validate`:
+
+| Category | Use for |
+| --- | --- |
+| `meta` | Skills about authoring, validating, or maintaining skills themselves |
+| `research` | Gathering external or unfamiliar information before acting |
+| `workflow` | How work gets planned, reviewed, and shipped |
+| `diagnostics` | Finding out why something is wrong, or making a system diagnosable |
+| `maintenance` | Changing existing code safely |
+
+Requiring this field is **repo policy**, not part of the [agentskills.io specification](https://agentskills.io/specification), which treats `metadata` as free-form. If none of the five fits, that's a signal worth discussing in the PR — add the new value to `ALLOWED_CATEGORIES` in [`scripts/validate-skills.js`](../../scripts/validate-skills.js) and document it in the table above, so growing the vocabulary is a visible decision rather than a silent one.
+
+## Declaring When *Not* to Use a Skill
+
+Every `SKILL.md` must state both when to use it and what to use something else for. Validation enforces the presence of a "When to Use" section and a "Do not use for" statement — either as its own heading or as a bolded line inside "When to Use".
+
+This matters more than it looks. Agents choose a skill from its `description` alone, and as the collection grows several skills will look plausible for the same request. Where two skills genuinely overlap, name the sibling skill explicitly in the exclusion list so the boundary is unambiguous. Only reference skills that actually exist — a stale name left behind after a rename is worse than no cross-reference.
 
 ## Writing a Good Description
 
@@ -82,7 +108,7 @@ npm run index       # regenerates the README skills table
 npm run index:check # verifies the table is up to date without writing (used in CI)
 ```
 
-`npm run validate` checks, per skill: required fields present, `name` format/length/directory match, `description` length, correct types for optional fields, and warns if the body exceeds ~500 lines.
+`npm run validate` checks, per skill: required fields present, `name` format/length/directory match, `description` length, `metadata.category` present and drawn from the allowed vocabulary, the presence of "When to Use" and "Do not use for" in the body, correct types for optional fields, and warns if the body exceeds ~500 lines.
 
 ## Common Mistakes
 
@@ -93,6 +119,9 @@ npm run index:check # verifies the table is up to date without writing (used in 
 | Description explains *how* the skill works step by step | Rewrite to describe only *when* to use it |
 | Forgetting to run `npm run index` after adding a skill | CI's `index:check` will fail the PR — run it locally and commit the diff |
 | Dumping a 1000-line reference doc straight into `SKILL.md` | Move it to `references/` and link to it |
+| Inventing a new `metadata.category` value ad hoc | Pick one of the five, or propose adding one by editing `ALLOWED_CATEGORIES` and the Categories table together |
+| Listing only when to use the skill | Add a "Do not use for" statement too; validation requires it |
+| Cross-referencing a skill that doesn't exist (or was renamed) | Only name skills present under `skills/` |
 
 ## Reference
 
