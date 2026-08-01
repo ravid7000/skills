@@ -22,6 +22,7 @@ skills/
 | --- | --- | --- |
 | [`creating-agent-skills`](skills/creating-agent-skills) | `meta` | Use when adding a new skill to this repository, editing an existing skill, or reviewing a skill contribution before merging. Covers the required SKILL.md layout, frontmatter fields, naming rules, and the validate/index workflow. |
 | [`finder`](skills/finder) | `research` | Use when an engineer needs researched, sourced, up-to-date information rather than an answer from model memory — e.g. "research best practices for X", "investigate this issue/bug", "find out how the community/industry handles Y", "what does the official documentation say about Z". Triggers on requests to research, investigate, or find authoritative information on a topic, library, API, error message, or design decision. |
+| [`instrumenting-for-observability`](skills/instrumenting-for-observability) | `diagnostics` | Use when a new or changed feature, endpoint, background job, or client-side flow is about to ship and needs logging, metrics, or tracing — or when reviewing whether a change would be diagnosable once it's running in production. Triggers on "add observability", "add logging/metrics/telemetry", "instrument this", "how will we know if this breaks", "we had no data during that incident", or a post-incident finding that a failure was invisible. |
 <!-- SKILLS_INDEX_END -->
 
 This table is generated from each skill's frontmatter — do not edit it by hand. Run `npm run index` to regenerate it after adding or editing a skill.
