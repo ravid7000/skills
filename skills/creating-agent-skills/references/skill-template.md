@@ -9,6 +9,7 @@ description: Use when <specific triggering situations, symptoms, or tasks>. <Add
 license: MIT
 metadata:
   category: <meta | research | workflow | diagnostics | maintenance>
+  tagline: <One plain sentence on what the skill does, for humans. Max 120 chars. Not "Use when...".>
 ---
 
 # Your Skill Title

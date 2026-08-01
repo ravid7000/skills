@@ -5,6 +5,7 @@ license: MIT
 compatibility: Assumes a codebase with existing telemetry, metrics, or structured logging to match. With none present, degrades to recommending signals and a setup rather than writing call sites. No specific vendor, language, or framework required.
 metadata:
   category: diagnostics
+  tagline: Adds logging, metrics, and tracing designed backwards from the questions an outage will ask.
 ---
 
 # Instrumenting for Observability

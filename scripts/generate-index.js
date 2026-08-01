@@ -19,6 +19,15 @@ function listSkillDirs() {
     .sort();
 }
 
+const REPO_SLUG = 'ravid7000/skills';
+// Absolute, because this README is also the npm package page, where relative
+// links are rewritten inconsistently.
+const REPO_URL = `https://github.com/${REPO_SLUG}/tree/master`;
+
+// Two audiences, two shapes. The summary table is for someone scanning to see
+// whether anything here is useful; the sections below give each skill its own
+// pitch and a copy-pasteable install line. Both come from frontmatter, so the
+// agent-facing `description` never has to double as marketing copy.
 function buildTable() {
   const dirs = listSkillDirs();
 
@@ -26,19 +35,58 @@ function buildTable() {
     return '_No skills yet. See [CONTRIBUTING.md](CONTRIBUTING.md) to add the first one!_';
   }
 
-  const rows = dirs.map((dirName) => {
+  const skills = dirs.map((dirName) => {
     const skillMdPath = join(SKILLS_DIR, dirName, 'SKILL.md');
     if (!existsSync(skillMdPath)) {
-      return `| \`${dirName}\` | — | _(missing SKILL.md)_ |`;
+      return { dirName, name: dirName, missing: true };
     }
     const { data } = matter(readFileSync(skillMdPath, 'utf8'));
-    const name = data.name || dirName;
-    const category = data.metadata?.category || '—';
-    const description = (data.description || '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
-    return `| [\`${name}\`](skills/${dirName}) | \`${category}\` | ${description} |`;
+    return {
+      dirName,
+      name: data.name || dirName,
+      category: data.metadata?.category || '—',
+      tagline: data.metadata?.tagline || '',
+      description: (data.description || '').replace(/\r?\n/g, ' ').trim(),
+      missing: false,
+    };
   });
 
-  return ['| Skill | Category | Description |', '| --- | --- | --- |', ...rows].join('\n');
+  const escape = (s) => s.replace(/\|/g, '\\|');
+
+  const summary = [
+    '| Skill | What it does |',
+    '| --- | --- |',
+    ...skills.map((s) =>
+      s.missing
+        ? `| \`${s.dirName}\` | _(missing SKILL.md)_ |`
+        : `| [**${s.name}**](#${s.name}) | ${escape(s.tagline)} |`
+    ),
+  ].join('\n');
+
+  const sections = skills
+    .filter((s) => !s.missing)
+    .map((s) =>
+      [
+        `### ${s.name}`,
+        '',
+        `\`${s.category}\` · [Read the skill →](${REPO_URL}/skills/${s.dirName})`,
+        '',
+        s.tagline,
+        '',
+        '```bash',
+        `npx skills add ${REPO_SLUG} --skill ${s.name}`,
+        '```',
+        '',
+        '<details><summary>When the agent loads it</summary>',
+        '',
+        s.description,
+        '',
+        '</details>',
+      ].join('\n')
+    )
+    .join('\n\n');
+
+  return `${summary}\n\n${sections}`;
 }
 
 function main() {
