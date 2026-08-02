@@ -28,6 +28,7 @@ Prefer versioned installs, or using [agent-skills-cli](https://www.npmjs.com/pac
 | Skill | What it does |
 | --- | --- |
 | [**creating-agent-skills**](#creating-agent-skills) | Authors and validates new skills so they load reliably and survive review. |
+| [**debugging-ui-flows**](#debugging-ui-flows) | Traces broken UI→API flows with temporary correlated logs, then tears them out. |
 | [**finder**](#finder) | Answers research questions from current, cited sources instead of model memory. |
 | [**instrumenting-for-observability**](#instrumenting-for-observability) | Adds logging, metrics, and tracing designed backwards from the questions an outage will ask. |
 
@@ -44,6 +45,22 @@ npx skills add ravid7000/skills --skill creating-agent-skills
 <details><summary>When the agent loads it</summary>
 
 Use when adding a new skill to this repository, editing an existing skill, or reviewing a skill contribution before merging. Covers the required SKILL.md layout, frontmatter fields, naming rules, and the validate/index workflow.
+
+</details>
+
+### debugging-ui-flows
+
+`diagnostics` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/debugging-ui-flows)
+
+Traces broken UI→API flows with temporary correlated logs, then tears them out.
+
+```bash
+npx skills add ravid7000/skills --skill debugging-ui-flows
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when a UI flow breaks and needs runtime evidence — button does nothing, wrong data after save, stuck loading, client vs API unclear — or when the user will reproduce locally and wants temporary debug logs / a flow trace. Triggers on "add logs and I'll repro", "trace this flow", "why is this request wrong", "instrument this bug", or guessing from code alone without a repro trail.
 
 </details>
 
