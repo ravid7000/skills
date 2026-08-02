@@ -39,6 +39,22 @@ The first keeps each round cheap enough that the user keeps engaging, and lets e
 - Unattended or autonomous runs with nobody to answer (see `compatibility`) — without a user the loop degenerates into assumption-making, the one thing it exists to prevent
 - Executing a plan that already exists, or reviewing someone else's
 
+## Guardrails
+
+These hold for every invocation, including the ones where the user sounds impatient and the change looks trivial. Nothing enforces them mechanically — they're the skill's contract, so say them at the start of the session rather than assuming they're understood.
+
+**No code. The only artifact is one Markdown document.** Not a scaffold, not a type definition "to make the interface concrete", not a stub full of `TODO`s, not a dependency added, not a migration, not a config tweak, not a commit. If a decision genuinely can't be expressed in prose, a short snippet may appear *inside the plan document* to illustrate it — and it stays there, never landing in a source file.
+
+**Implementation needs an explicit go-ahead, given in a turn after the plan exists.** Writing the file ends the skill; the next turn belongs to the user. Momentum is not consent — not an enthusiastic planning session, not a plan that's obviously ready, not a change small enough to do in the time it takes to ask.
+
+This holds even when the original request bundled both: "plan this and then build it." The plan is the thing that changed the user's information, and the most common reaction to reading a good one is wanting something slightly different. Ask, and read the answer, before the first edit. Once the go-ahead comes, implementing is ordinary work and no longer this skill's business.
+
+**One file, at a confirmed path, and nothing else in the repo.** No README, index, or changelog updates thrown in as a courtesy; no reformatting of files opened during grounding. If a document already exists at the target path, ask before overwriting it — a stale plan may still be someone's reference.
+
+**Grounding is read-only.** Reading files, searching, and inspecting history with `git log` or `git show` are all fine. Switching branches, stashing, installing dependencies, running migrations, or running a build or test suite that writes files are not. If running something really is the only way to learn what you need, ask first.
+
+**Nothing sensitive in the document.** Plans get committed, shared, and pasted into tickets. Credentials, tokens, customer records, and personal data copied out of logs or fixtures stay out of it — describe the shape of the data instead.
+
 ## Core Process
 
 ### 1. Ground yourself before asking anything
@@ -120,7 +136,7 @@ If you've asked roughly 8–10 questions and the plan still isn't converging, th
 
 Match the repo before inventing a location: look for an existing `docs/plans/`, `docs/rfcs/`, `design/`, or equivalent and follow its naming. If nothing like that exists, propose `docs/plans/<yyyy-mm-dd>-<slug>.md` and confirm the path before writing.
 
-Write exactly one file and nothing else. This skill produces a plan, not an implementation — stopping short of code is the point, and the user's next turn decides whether to build it. Finish by printing the path and a three-line summary of what was decided.
+Write exactly one file. Then finish by printing the path, a three-line summary of what was decided, and the question of whether to implement it — and stop there. Stopping short of code is the point of the skill, not a limitation of it: per the guardrails above, the go-ahead is the user's to give, in their own turn, after they've read what they're agreeing to.
 
 ## Plan Document Template
 
@@ -207,5 +223,8 @@ This changes <which part of the plan>.
 | Arguing for more questions after "just write it up" | Honour it immediately; unknowns become Open Questions |
 | Asking more questions when nothing is converging | The scope is too big — propose phases and plan phase 1 only |
 | Steps like "update the backend" | Name the files and the verification for each step |
-| Starting to implement once the plan is written | One file, no code; the user's next turn decides whether to build it |
+| Writing "just the interface" or a stub to make the plan concrete | No code — an illustrative snippet belongs inside the document, never in a source file |
+| Implementing because the plan was clearly agreed | Agreement on the plan isn't a go-ahead to build it; ask, in a separate turn |
+| Reading "plan it and then build it" as pre-authorisation | The plan is what may change the user's mind; confirm after they've read it |
+| Tidying or reformatting files opened during grounding | Touch exactly one file: the plan |
 | Rewriting the whole document after every answer | Keep a running decision list in the conversation; write the file once, at the end |
