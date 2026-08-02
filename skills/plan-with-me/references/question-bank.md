@@ -2,11 +2,11 @@
 
 Material for step 3 of [`SKILL.md`](../SKILL.md). Use it to find the *highest-leverage* question for the change in front of you — not as a checklist to walk. Most changes need three to six questions total, and a question only earns a turn if its answer changes a step in the plan.
 
-Every question here still has to be asked in the four-part shape (context, options, recommendation, consequence) from the skill body. A bare question copied from this file is worse than no question.
+Every question here still has to be asked in the four-part shape (context, options, recommendation, consequence) from the skill body, and delivered through the host's question tool where one exists. A bare question copied from this file is worse than no question.
 
-## Ask the codebase first, not the user
+## Facts to look up, not to ask
 
-These come up in almost every planning session and almost never belong in a question. Answer them yourself in the step 1 grounding pass; asking them tells the user you haven't looked.
+The line isn't "can I find the answer myself?" — it's fact versus decision. The questions below have one right answer sitting in the repo, so asking them tells the user you haven't looked. Answer them yourself in the step 1 grounding pass.
 
 | Don't ask | Find it in |
 | --- | --- |
@@ -19,7 +19,18 @@ These come up in almost every planning session and almost never belong in a ques
 | "Which version of `<library>` are you on?" | The lockfile — then check that version's docs, not your memory |
 | "Has this been tried before?" | Search the repo, then `git log` for the area |
 
-The pattern: **anything discoverable is yours to discover.** Reserve questions for intent, priorities, and tradeoffs — the things that live only in the user's head.
+The pattern: **anything with one right answer is yours to find.** Reserve turns for intent, priorities, and tradeoffs.
+
+What a fact often *does* do is turn into a decision worth asking. Each of these is a real question, and the discovered fact is what makes it a good one:
+
+| Found in the code | Question it seeds |
+| --- | --- |
+| The module has no tests | "Nothing here is tested today. Add coverage for this change only, or backfill the module while we're in it?" |
+| Validation happens in the controller | "Keep validation at the controller like the rest, or push it into the service for this flow?" |
+| A near-identical helper already exists | "Extend the existing helper and change its two callers, or add a parallel one and leave them alone?" |
+| The library is three majors behind | "Plan against the pinned version, or upgrade first as its own phase?" |
+
+Consistency with what's there is a default worth recommending. It is never a default worth assuming — a change is often exactly where someone wants the existing pattern to stop.
 
 ## By kind of change
 
@@ -72,14 +83,16 @@ The pattern: **anything discoverable is yours to discover.** Reserve questions f
 
 ## Questions that only look useful
 
-| Question | Why it wastes the turn |
+Usually the topic is fine and the *shape* is wrong: no options attached, or only one answer a person would ever give. Each of these has a version worth a turn.
+
+| Don't ask | Ask instead |
 | --- | --- |
-| "Should I write tests?" | Match the repo. If it tests this kind of code, test it |
-| "Do you want this to be clean/maintainable/performant?" | Nobody says no. Ask about a specific tradeoff with a real cost instead |
-| "Any other requirements?" | Open-ended and unanswerable. Propose the specific thing you suspect is missing |
-| "Shall I proceed?" mid-planning | The loop is the work; only ask before writing the file |
-| "How do you want it structured?" | Propose a structure grounded in what's already there and let it be corrected |
-| Anything already answered earlier in the conversation | Keep the running decision list (step 5) so this can't happen |
+| "Should I write tests?" | Nobody says no. "Unit tests at the service, or one integration test through the endpoint?" if the level is genuinely contested |
+| "Do you want this clean/maintainable/performant?" | Name the specific tradeoff and what it costs: "cache this and accept staleness of up to a minute, or query live?" |
+| "Any other requirements?" | Unanswerable in the abstract. Propose the specific thing you suspect is missing and let it be confirmed |
+| "Shall I proceed?" mid-planning | Nothing — the loop is the work. Save the one go-ahead question for after the file is written |
+| "How do you want it structured?" | Propose a structure grounded in what's already there, as options, and let it be corrected |
+| Anything already answered earlier in the conversation | Nothing. Keep the running decision list (step 5) so this can't happen |
 
 ## When the user doesn't know
 

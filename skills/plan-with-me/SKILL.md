@@ -2,7 +2,7 @@
 name: plan-with-me
 description: Use when a request is too large, vague, or contested to start coding — "plan this with me", "help me think through X", "let's design this before I build it", "write an implementation plan / design doc / RFC", "how should I approach this refactor, migration, or integration". Triggers when requirements are ambiguous, when several designs are defensible, when a feature ask hides decisions nobody has made yet, or when an engineer wants to be walked through those decisions interactively before any code is written.
 license: MIT
-compatibility: Needs an interactive session where the user can answer between turns, read access to the codebase, and permission to write one Markdown file. Web search is strongly recommended for closing unknowns. Not for unattended runs — with nobody to answer, the no-assumption rule cannot hold.
+compatibility: Needs an interactive session where the user can answer between turns, read access to the codebase, and permission to write one Markdown file. Uses the host's structured question tool when there is one (AskUserQuestion, AskQuestion, ask_user, request_user_input, ask_followup_question) and falls back to plain prose. Web search is strongly recommended for closing unknowns. Not for unattended runs — with nobody to answer, the no-assumption rule cannot hold.
 metadata:
   category: workflow
   tagline: Turns a vague request into an agreed, written plan by asking one grounded question at a time.
@@ -16,11 +16,13 @@ A plan is worth writing only if it removes decisions the implementer would other
 
 This skill replaces that with a conversation that converges. Two rules do most of the work:
 
-> **One question per turn, and never a question the codebase already answers.**
+> **One question per turn, and every question worth the user's attention.**
 >
 > **Every unknown is resolved by evidence or handed back to the user — never filled with an assumption.**
 
-The first keeps each round cheap enough that the user keeps engaging, and lets every answer reshape the question that follows it. The second is what makes the output trustworthy: a plan in which every line is traceable to a file, a source, or the user's own words.
+The first keeps each round cheap enough that the user keeps engaging, and lets every answer reshape the question that follows it. Note what it does *not* say: that a question is only worth asking when the codebase can't answer it. Precedent in the code is a strong default, not a decision the user has delegated — where a choice is genuinely theirs, it gets asked, with the code's answer offered as the recommended option. What never gets asked is a *fact* you could have looked up.
+
+The second rule is what makes the output trustworthy: a plan in which every line is traceable to a file, a source, or the user's own words.
 
 ## When to Use
 
@@ -59,7 +61,7 @@ This holds even when the original request bundled both: "plan this and then buil
 
 ### 1. Ground yourself before asking anything
 
-Read the code first. Any question asked before this risks being one the repo already answered, and those are expensive twice over: they waste a turn, and they teach the user that supplying context is their job rather than yours.
+Read the code first. Grounding isn't there to reduce the number of questions — it's there to upgrade them. An open "how should we handle X?" becomes "the code already does X this way; keep it or deviate here?", which costs the user one keystroke instead of a paragraph and is far likelier to get answered.
 
 Spend a bounded pass — roughly 5–15 file reads — establishing:
 
@@ -91,9 +93,40 @@ Each question carries four parts:
 | **Recommendation** | Which you'd pick and why. The user is usually here for a decision, not a quiz |
 | **Consequence** | What changes in the plan depending on the answer |
 
+The filter for whether a question earns a turn is **would the user want a say?** — not whether you could find an answer yourself. Those come apart, and the difference is facts versus decisions:
+
+| Kind | Test | What to do |
+| --- | --- | --- |
+| **Fact** | One right answer, discoverable | Never ask. Look it up: which test runner, what a function does, which version is pinned, where analogous code lives |
+| **Decision** | More than one answer is defensible, and a reasonable engineer might pick differently | Ask — *including* when the codebase shows what was done last time |
+
+So a convention found in step 1 doesn't close a question, it seeds one. "The repo validates at the controller; keep that here, or push it into the service?" is worth a turn even though the code plainly says what happens today, because the user may well want this change to be where that changes. Consistency is a default worth recommending, never one worth assuming.
+
 Two failure modes to avoid at this step. Never ask an open "any preferences on X?" with no options attached — that outsources the thinking you were asked to do. And when an earlier answer makes a queued question moot, drop it and say you're dropping it, rather than asking it because it was on your list.
 
 Accept delegation gracefully. If the user says "you decide", take your recommendation, record it as **your** decision with its reasoning attached, and move on. A recorded decision the user can veto later is not an assumption. An unrecorded one is.
+
+#### Ask through the host's question tool, not in prose
+
+Most agent hosts have a dedicated tool for asking the user something: it renders clickable options, pauses the turn, and returns the answer as structured data. **Use it for every question in this loop, and never type a question as plain prose when the tool exists** — a picker is answered in one click, while a paragraph ending in a question mark competes with everything else on the user's screen and often gets a partial answer.
+
+Check your own available tools first; that list is the only authoritative source. Known names at the time of writing:
+
+| Host | Tool | Notes |
+| --- | --- | --- |
+| Claude Code | `AskUserQuestion` | 1–4 questions per call, 2–4 options each, `header` ≤12 chars. An "Other" free-text choice is appended automatically. Unavailable inside `Task` subagents |
+| Cursor | `AskQuestion` | Always available in Plan mode; in Agent mode it depends on the selected model |
+| Gemini CLI | `ask_user` | 1–4 questions, `type` of `choice`, `text`, or `yesno`, `header` ≤16 chars |
+| Codex CLI | `request_user_input` | Experimental — needs `collaboration_modes = true`, and is plan-mode only |
+| Cline / Roo Code | `ask_followup_question` | One `question` plus a short list of suggested answers |
+
+Mapping the four parts onto a tool call: **context** and **consequence** go in the message immediately before the call (keep the question text able to stand alone, since some hosts show only the picker); **options** become the choices, each `description` carrying the tradeoff rather than restating the label; the **recommendation** goes first in the list, marked "(Recommended)".
+
+Three rules for using these tools:
+
+- **One question per call**, even though most schemas accept up to four. The schema's allowance is not permission to batch — it's the temptation this skill exists to resist.
+- **Never hand-write an "Other" or "Something else" option** on a host that adds one, and never present options as the complete space. The free-text escape is load-bearing: it's how the user says "neither" or "I don't know", which is what keeps step 4 honest.
+- **Fall back gracefully.** If no such tool exists in the current host, ask in prose using the shape in [Quick Reference](#quick-reference) and end the turn. Never fake a picker with numbered lists the host can't render, and never treat a missing tool as licence to stop asking.
 
 ### 4. Resolve unknowns; never paper over them
 
@@ -136,7 +169,7 @@ If you've asked roughly 8–10 questions and the plan still isn't converging, th
 
 Match the repo before inventing a location: look for an existing `docs/plans/`, `docs/rfcs/`, `design/`, or equivalent and follow its naming. If nothing like that exists, propose `docs/plans/<yyyy-mm-dd>-<slug>.md` and confirm the path before writing.
 
-Write exactly one file. Then finish by printing the path, a three-line summary of what was decided, and the question of whether to implement it — and stop there. Stopping short of code is the point of the skill, not a limitation of it: per the guardrails above, the go-ahead is the user's to give, in their own turn, after they've read what they're agreeing to.
+Write exactly one file. Then finish by printing the path, a three-line summary of what was decided, and the question of whether to implement it — asked through the same question tool as everything else, since this is the one answer the whole loop was building towards — and stop there. Stopping short of code is the point of the skill, not a limitation of it: per the guardrails above, the go-ahead is the user's to give, in their own turn, after they've read what they're agreeing to.
 
 ## Plan Document Template
 
@@ -189,7 +222,7 @@ Write exactly one file. Then finish by printing the path, a three-line summary o
 
 ## Quick Reference
 
-The shape of a single question:
+The prose fallback for a single question, used only on hosts with no question tool:
 
 ```markdown
 **<The question>**
@@ -206,7 +239,7 @@ This changes <which part of the plan>.
 
 ## References
 
-- [`references/question-bank.md`](references/question-bank.md) — what's worth asking per kind of change (new feature, refactor, migration, integration, API, data model), which questions the codebase should answer instead, and the ones that only look useful
+- [`references/question-bank.md`](references/question-bank.md) — what's worth asking per kind of change (new feature, refactor, migration, integration, API, data model), which facts to look up instead of asking, how a discovered fact turns into a real question, and the questions that only look useful
 
 ## Common Mistakes
 
@@ -214,7 +247,10 @@ This changes <which part of the plan>.
 | --- | --- |
 | Producing a finished plan in one pass from the first message | That's the failure this skill exists to prevent — ground, confirm intent, then ask |
 | Sending eight questions at once | One per turn, highest-leverage first, each reshaped by the last answer |
-| Asking what the repo already answers | Do the step 1 grounding pass before the first question |
+| Asking a fact you could have looked up — the test runner, the conventions, what a function does | Find it in the step 1 grounding pass; turns are for decisions |
+| Skipping a real decision because the code shows what was done last time | Precedent is the default, not the decision — ask it as keep-or-deviate with the precedent recommended |
+| Typing questions as prose on a host that has a question tool | Use the tool; a picker gets a click, a paragraph gets skimmed |
+| Batching four questions into one tool call because the schema allows it | One question per call — the allowance isn't permission |
 | "Any preferences on X?" with no options attached | Attach 2–4 concrete options, real tradeoffs, and a recommendation |
 | Filling a gap with a plausible-sounding sentence | Work the ladder: code, then sources, then the user, then Open Questions |
 | Stating version-specific behaviour from memory | Verify it against docs and cite the URL, or ask |
