@@ -31,6 +31,7 @@ Prefer versioned installs, or using [agent-skills-cli](https://www.npmjs.com/pac
 | [**debugging-ui-flows**](#debugging-ui-flows) | Traces broken UI→API flows with temporary correlated logs, then tears them out. |
 | [**finder**](#finder) | Answers research questions from current, cited sources instead of model memory. |
 | [**instrumenting-for-observability**](#instrumenting-for-observability) | Adds logging, metrics, and tracing designed backwards from the questions an outage will ask. |
+| [**plan-with-me**](#plan-with-me) | Turns a vague request into an agreed, written plan by asking one grounded question at a time. |
 
 ### creating-agent-skills
 
@@ -93,6 +94,22 @@ npx skills add ravid7000/skills --skill instrumenting-for-observability
 <details><summary>When the agent loads it</summary>
 
 Use when a new or changed feature, endpoint, background job, or client-side flow is about to ship and needs logging, metrics, or tracing — or when reviewing whether a change would be diagnosable once it's running in production. Triggers on "add observability", "add logging/metrics/telemetry", "instrument this", "how will we know if this breaks", "we had no data during that incident", or a post-incident finding that a failure was invisible.
+
+</details>
+
+### plan-with-me
+
+`workflow` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/plan-with-me)
+
+Turns a vague request into an agreed, written plan by asking one grounded question at a time.
+
+```bash
+npx skills add ravid7000/skills --skill plan-with-me
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when a request is too large, vague, or contested to start coding — "plan this with me", "help me think through X", "let's design this before I build it", "write an implementation plan / design doc / RFC", "how should I approach this refactor, migration, or integration". Triggers when requirements are ambiguous, when several designs are defensible, when a feature ask hides decisions nobody has made yet, or when an engineer wants to be walked through those decisions interactively before any code is written.
 
 </details>
 <!-- SKILLS_INDEX_END -->
