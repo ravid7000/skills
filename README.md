@@ -30,6 +30,7 @@ Prefer versioned installs, or using [agent-skills-cli](https://www.npmjs.com/pac
 | [**creating-agent-skills**](#creating-agent-skills) | Authors and validates new skills so they load reliably and survive review. |
 | [**debugging-ui-flows**](#debugging-ui-flows) | Traces broken UI→API flows with temporary correlated logs, then tears them out. |
 | [**finder**](#finder) | Answers research questions from current, cited sources instead of model memory. |
+| [**handing-off-work**](#handing-off-work) | Writes a handoff a fresh agent can resume from — decisions, dead ends, and verified code state. |
 | [**instrumenting-for-observability**](#instrumenting-for-observability) | Adds logging, metrics, and tracing designed backwards from the questions an outage will ask. |
 | [**plan-with-me**](#plan-with-me) | Turns a vague request into an agreed, written plan by asking one grounded question at a time. |
 
@@ -78,6 +79,22 @@ npx skills add ravid7000/skills --skill finder
 <details><summary>When the agent loads it</summary>
 
 Use when an engineer needs researched, sourced, up-to-date information rather than an answer from model memory — e.g. "research best practices for X", "investigate this issue/bug", "find out how the community/industry handles Y", "what does the official documentation say about Z". Triggers on requests to research, investigate, or find authoritative information on a topic, library, API, error message, or design decision.
+
+</details>
+
+### handing-off-work
+
+`workflow` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/handing-off-work)
+
+Writes a handoff a fresh agent can resume from — decisions, dead ends, and verified code state.
+
+```bash
+npx skills add ravid7000/skills --skill handing-off-work
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when a session is ending or running out of context and the work isn't finished — "write a handoff", "summarise this session", "I'm out of context, save state", "continue this in Claude Code / Codex / Cursor", "pick up where we left off tomorrow", "hand this over to another agent", "brief the next person on this branch". Triggers whenever unfinished work has to survive the end of the session it was done in — across a compaction, a new session, a different agent harness, or a different engineer — and when picking work back up from a handoff document someone else left.
 
 </details>
 
