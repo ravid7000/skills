@@ -1,6 +1,6 @@
 {
   "name": "@ravid7000/skills",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Reusable Agent Skills for Claude Code, Cursor, Codex, Copilot and other AI coding agents — research, observability instrumentation, and skill authoring.",
   "keywords": [
     "agent-skills",
