@@ -40,7 +40,7 @@ An agent writing "I updated the auth middleware" from memory is reporting an int
 - **Permanent documentation, an ADR, or a runbook** — a handoff decays the moment the branch moves and is meant to be thrown away. A decision worth keeping should be promoted into real docs instead of left in a handoff nobody will find
 - **Answering "what did you just do?"** — that's a reply in the conversation. This skill's output is a file, and writing one for a question is overkill
 - **A session with nothing to resume** — finished, merged, or abandoned work needs no handoff, and the ceremony has a real cost
-- **Diagnosing why something is broken** — `debugging-ui-flows` or `instrumenting-for-observability` produce the evidence; hand off the conclusions once you have them
+- **Diagnosing why something is broken** — `debug-flow` or `instrumenting-for-observability` produce the evidence; hand off the conclusions once you have them
 
 ## Core Process
 

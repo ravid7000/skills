@@ -28,7 +28,7 @@ Prefer versioned installs, or using [agent-skills-cli](https://www.npmjs.com/pac
 | Skill | What it does |
 | --- | --- |
 | [**creating-agent-skills**](#creating-agent-skills) | Authors and validates new skills so they load reliably and survive review. |
-| [**debugging-ui-flows**](#debugging-ui-flows) | Traces broken UI→API flows with temporary correlated logs, then tears them out. |
+| [**debug-flow**](#debug-flow) | Traces broken flows across any stack with temporary correlated logs, then tears them out. |
 | [**finder**](#finder) | Answers research questions from current, cited sources instead of model memory. |
 | [**handing-off-work**](#handing-off-work) | Writes a handoff a fresh agent can resume from — decisions, dead ends, and verified code state. |
 | [**instrumenting-for-observability**](#instrumenting-for-observability) | Adds logging, metrics, and tracing designed backwards from the questions an outage will ask. |
@@ -50,19 +50,19 @@ Use when adding a new skill to this repository, editing an existing skill, or re
 
 </details>
 
-### debugging-ui-flows
+### debug-flow
 
-`diagnostics` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/debugging-ui-flows)
+`diagnostics` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/debug-flow)
 
-Traces broken UI→API flows with temporary correlated logs, then tears them out.
+Traces broken flows across any stack with temporary correlated logs, then tears them out.
 
 ```bash
-npx skills add ravid7000/skills --skill debugging-ui-flows
+npx skills add ravid7000/skills --skill debug-flow
 ```
 
 <details><summary>When the agent loads it</summary>
 
-Use when a UI flow breaks and needs runtime evidence — button does nothing, wrong data after save, stuck loading, client vs API unclear — or when the user will reproduce locally and wants temporary debug logs / a flow trace. Triggers on "add logs and I'll repro", "trace this flow", "why is this request wrong", "instrument this bug", or guessing from code alone without a repro trail.
+Use when a flow breaks and needs runtime evidence — button does nothing, wrong data after save, an endpoint returns the wrong result, a CLI command or job fails silently, a request dies between layers — or when the user will reproduce locally and wants temporary debug logs / a flow trace. Triggers on "add logs and I'll repro", "trace this flow", "why is this request wrong", "instrument this bug", or guessing from code alone without a repro trail.
 
 </details>
 
