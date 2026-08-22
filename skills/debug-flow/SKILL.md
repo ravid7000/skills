@@ -1,18 +1,18 @@
 ---
-name: debugging-ui-flows
-description: Use when a UI flow breaks and needs runtime evidence — button does nothing, wrong data after save, stuck loading, client vs API unclear — or when the user will reproduce locally and wants temporary debug logs / a flow trace. Triggers on "add logs and I'll repro", "trace this flow", "why is this request wrong", "instrument this bug", or guessing from code alone without a repro trail.
+name: debug-flow
+description: Use when a flow breaks and needs runtime evidence — button does nothing, wrong data after save, an endpoint returns the wrong result, a CLI command or job fails silently, a request dies between layers — or when the user will reproduce locally and wants temporary debug logs / a flow trace. Triggers on "add logs and I'll repro", "trace this flow", "why is this request wrong", "instrument this bug", or guessing from code alone without a repro trail.
 license: MIT
-compatibility: Expects a human to reproduce in their browser. Browser automation MCPs (Playwright, Chrome DevTools) are not required and are out of scope for this skill.
+compatibility: Expects a human to reproduce locally (browser, terminal, curl, test run). Automation MCPs such as Playwright or Chrome DevTools are not required and are out of scope for this skill.
 metadata:
   category: diagnostics
-  tagline: Traces broken UI→API flows with temporary correlated logs, then tears them out.
+  tagline: Traces broken flows across any stack with temporary correlated logs, then tears them out.
 ---
 
-# Debugging UI Flows
+# Debug Flow
 
 ## Overview
 
-Static reading of frontend and API code often produces confident wrong guesses. A broken user journey needs a **temporary, correlated trail** across the UI and the handlers behind it: the human reproduces once, the agent reads the sink (or a paste), and the first divergence names the real fault.
+Static reading of code often produces confident wrong guesses. A broken flow — a UI journey, an API request, a CLI command, a background job — needs a **temporary, correlated trail** across every layer it crosses: the human reproduces once, the agent reads the sink (or a paste), and the first divergence names the real fault.
 
 Core discipline:
 
@@ -22,8 +22,8 @@ This skill is for *this bug's* trail. It is not permanent production observabili
 
 ## When to Use
 
-- A UI bug needs reproduction (“button does nothing”, “wrong data after save”, “stuck loading”)
-- The flow fails at a specific step and it is unclear whether the client, the API, or the wiring is wrong
+- A bug needs reproduction (“button does nothing”, “wrong data after save”, “job never runs”, “CLI exits wrong”)
+- The flow fails at a specific step and it is unclear which layer is wrong — client, API, service, worker, DB, script, or the wiring between them
 - The agent is guessing from code alone and needs runtime evidence
 - The user will reproduce locally (“add logs and I’ll repro”, “trace this flow”, “why is this request wrong”)
 
@@ -31,7 +31,7 @@ This skill is for *this bug's* trail. It is not permanent production observabili
 
 - **Permanent production observability** — logging, metrics, or tracing meant to ship and stay. Use `instrumenting-for-observability` instead
 - **Static-only code review** with no planned runtime reproduction
-- **Browser automation** via Playwright MCP, Chrome DevTools MCP, or similar agent-driven browser loops (out of scope for this skill)
+- **Agent-driven automation loops** via Playwright MCP, Chrome DevTools MCP, or similar (out of scope for this skill)
 - **Performance profiling**, visual polish, or authoring flaky E2E tests
 
 ## Core Process
@@ -49,26 +49,26 @@ If any of these are missing, ask. Do not instrument a vague “it’s broken.”
 
 ### 2. Map the flow (no code changes yet)
 
-Sketch the minimal path that can explain the bug:
+Sketch the minimal path that can explain the bug, whatever the stack:
 
-`UI action → client handler/state → request → API entry → service/DB → API response → client handling → UI apply`
+`entry (UI event / HTTP request / CLI invocation / job trigger) → handlers and state → calls across boundaries → core logic / DB → response or side effect → output applied`
 
 Mark unknowns. Prefer the smallest path that can produce the symptom. Do not add logs yet.
 
 ### 3. Instrument sparsely (temporary)
 
-Generate one `debugRunId` for the session. Using whatever logger or `console` the repo already uses, add **boundary** logs only:
+Generate one `debugRunId` for the session. Using whatever logger, `console`, or print facility the repo already uses, add **boundary** logs only — one at each point where the flow enters or leaves a layer:
 
-| Step id | Where |
+| Step id pattern | Where |
 | --- | --- |
-| `ui.click` / `ui.submit` | User-facing entry to the flow |
-| `client.request` | Immediately before the network call (method, URL path, decisive non-sensitive fields / shape) |
-| `api.entry` | API handler entry |
-| `api.exit` / `api.error` | Handler success or failure path |
-| `client.response` | After response received (status, parsed shape, branch taken) |
-| `ui.apply` | State/UI update from the result |
+| `entry` | The flow's entry point (UI click/submit, route handler, CLI main, job start) |
+| `<layer>.request` | Immediately before a call across a boundary — HTTP, queue, RPC, subprocess (target, decisive non-sensitive fields / shape) |
+| `<layer>.entry` | The receiving side of that boundary |
+| `<layer>.exit` / `<layer>.error` | The receiving side's success or failure path |
+| `<layer>.response` | After the caller gets the result back (status, parsed shape, branch taken) |
+| `apply` | Final state, UI, file, or DB update from the result |
 
-Every line must carry the [log contract](#log-contract) fields so client and server lines sort into one story.
+Name layers after the code: `ui`, `client`, `api`, `service`, `worker`, `db`, `cli`. Every line must carry the [log contract](#log-contract) fields so lines from all layers sort into one story.
 
 Do **not** log every function on this first pass.
 
@@ -77,8 +77,8 @@ Do **not** log every function on this first pass.
 Tell them exactly:
 
 1. What actions to perform (the repro steps)
-2. What to watch or copy (server terminal, browser console filtered by `DEBUG_FLOW` / `debugRunId`, network status for the call)
-3. That you prefer sinks you can read locally; otherwise paste the matching log lines plus the failing request’s status
+2. What to watch or copy — server terminal, CLI output, log file, or browser console, filtered by `DEBUG_FLOW` / `debugRunId`; plus the status of the failing call if the flow crosses HTTP
+3. That you prefer sinks you can read locally; otherwise paste the matching log lines
 
 Wait for evidence. Do not invent a root cause while waiting.
 
@@ -89,7 +89,7 @@ Walk the trail in order for this `debugRunId`:
 - Mark the **last line that still looks expected**
 - Mark the **first line that is wrong, missing, or never reached**
 
-That span is the only place to densify next. If the trail never enters the API, the break is on the client (or the request never fired). If the API returns correctly and the UI is wrong, densify on the client apply path.
+That span is the only place to densify next. If the trail never crosses a boundary, the break is on the calling side (or the call never fired). If a layer returns correctly and its consumer is wrong, densify on the consuming side.
 
 ### 6. Densify only around the break
 
@@ -101,7 +101,7 @@ Reproduce again. Repeat steps 5–6 until the cause is specific enough to fix.
 
 ### 7. Fix the root cause
 
-Change production behavior. Do not “fix” the bug by leaving debug logs in place or by papering over a missing request with UI-only guesses contradicted by the trail.
+Change production behavior. Do not “fix” the bug by leaving debug logs in place or by papering over the symptom with guesses the trail contradicts.
 
 ### 8. Cleanup and verify (hard gate)
 
@@ -111,18 +111,18 @@ Before claiming done:
 - [ ] Grep the diff / tree for `DEBUG_FLOW`, the `debugRunId`, and obvious debug leftovers
 - [ ] Confirm the original repro is fixed **without** debug noise
 
-If the investigation exposed a lasting production blind spot, mention handing that gap to `instrumenting-for-observability` **after** cleanup — do not convert temporary debug lines into shipped telemetry inside this skill.
+The task is not done while temporary instrumentation remains — cleanup is part of the fix, not a follow-up. If the investigation exposed a lasting production blind spot, mention handing that gap to `instrumenting-for-observability` **after** cleanup — do not convert temporary debug lines into shipped telemetry inside this skill.
 
 ## Log Contract
 
-Apply with the project’s existing logger or `console`. Same fields on client and server.
+Apply with the project’s existing logger, `console`, or print facility. Same fields in every layer.
 
 **Required on every debug line:**
 
 | Field | Meaning |
 | --- | --- |
 | `debugRunId` | One id for the whole repro session |
-| `flow` | Short journey name (`checkout.submit`, `profile.save`) |
+| `flow` | Short journey name (`checkout.submit`, `import.run`) |
 | `step` | Stable step id from the table above (or a clear sub-step under the densify span) |
 | `note` or `hypothesis` | What this line is meant to prove or disprove |
 
@@ -132,7 +132,7 @@ Apply with the project’s existing logger or `console`. Same fields on client a
 
 **Sink preference:**
 
-1. Existing structured logger / server stdout the agent can read
+1. Stdout / log file the agent can read locally (server terminal, CLI output, worker logs)
 2. Client console with a shared prefix (human pastes if needed)
 3. Temporary local debug file only if both are awkward — mark it for deletion in cleanup
 
@@ -149,14 +149,10 @@ When asking for a repro, be concrete. Example shape:
 > Repro with debug trail `run=<debugRunId>`:
 > 1. <step>
 > 2. <step>
-> 3. Watch the server terminal / paste browser console lines containing `DEBUG_FLOW` or `run=<debugRunId>`
-> 4. Note the status code of `<method> <path>` if it appears in the Network panel
+> 3. Watch the terminal (or paste console/log lines) containing `DEBUG_FLOW` or `run=<debugRunId>`
+> 4. If the flow crosses HTTP, note the status code of `<method> <path>`
 >
-> I’ll read local logs if they’re in the terminal; otherwise paste the matching lines.
-
-## Cleanup Gate
-
-The task is not done while temporary instrumentation remains. Cleanup is part of the fix, not a follow-up.
+> I’ll read local logs if they’re in a sink I can reach; otherwise paste the matching lines.
 
 ## Common Mistakes
 
