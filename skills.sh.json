@@ -1,0 +1,36 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Research",
+      "description": "Skills that gather current, cited evidence instead of answering from model memory.",
+      "skills": [
+        "finder"
+      ]
+    },
+    {
+      "title": "Workflow",
+      "description": "Skills for planning work and handing it off so the next session can resume.",
+      "skills": [
+        "handing-off-work",
+        "plan-with-me"
+      ]
+    },
+    {
+      "title": "Diagnostics",
+      "description": "Skills for tracing broken flows and instrumenting what ships so failures are visible.",
+      "skills": [
+        "debug-flow",
+        "instrumenting-for-observability"
+      ]
+    },
+    {
+      "title": "Authoring",
+      "description": "Skills for writing and reviewing the skills in this collection.",
+      "skills": [
+        "creating-agent-skills"
+      ]
+    }
+  ]
+}

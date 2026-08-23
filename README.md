@@ -3,6 +3,7 @@
 **Reusable [Agent Skills](https://agentskills.io/specification) for Claude Code, Cursor, Codex, Copilot, and 70+ other AI coding agents.** Drop-in instructions that make an agent research properly, instrument what it ships, and write skills that actually load.
 
 [![npm](https://img.shields.io/npm/v/@ravid7000/skills?color=cb3837&logo=npm)](https://www.npmjs.com/package/@ravid7000/skills)
+[![skills.sh](https://skills.sh/b/ravid7000/skills)](https://skills.sh/ravid7000/skills)
 [![CI](https://img.shields.io/github/actions/workflow/status/ravid7000/skills/validate-skills.yml?branch=master&label=validate)](https://github.com/ravid7000/skills/actions/workflows/validate-skills.yml)
 [![license](https://img.shields.io/npm/l/@ravid7000/skills)](https://github.com/ravid7000/skills/blob/master/LICENSE)
 
@@ -189,7 +190,7 @@ mkdir skills/your-skill-name
 cp skills/creating-agent-skills/references/skill-template.md skills/your-skill-name/SKILL.md
 # write it, then:
 npm run validate     # frontmatter, required sections, category
-npm run index        # regenerates the Skills section above
+npm run index        # regenerates the Skills section above and skills.sh.json
 npx changeset        # release note for the change
 ```
 
