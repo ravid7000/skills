@@ -15,10 +15,10 @@ git config user.email "ravid7000@gmail.com"
 
 ```bash
 npm run validate     # every skill's frontmatter and required sections
-npm run index        # regenerates the README skills table
+npm run index        # regenerates the README skills table and skills.sh.json
 ```
 
-Both run in CI, so a PR fails without them. Never hand-edit the skills table in `README.md` — it's generated from frontmatter.
+Both run in CI, so a PR fails without them. Never hand-edit the skills table in `README.md` or `skills.sh.json` — both are generated from frontmatter.
 
 ## Changesets
 

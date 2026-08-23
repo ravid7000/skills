@@ -46,7 +46,7 @@ Skills live in a **flat namespace** directly under `skills/` — no nested categ
 4. **Write the frontmatter** (see field reference below). `name`, `description`, `metadata.category`, and `metadata.tagline` are required.
 5. **Write the body.** Keep it under ~500 lines; move heavy reference material into `references/*.md` and reusable code into `scripts/`. Link to them with relative paths. It must include a "When to Use" section and a "Do not use for" statement.
 6. **Validate:** run `npm install` (once) then `npm run validate`.
-7. **Update the index:** run `npm run index` to regenerate the skills table in [README.md](../../README.md), and commit the result.
+7. **Update the index:** run `npm run index` to regenerate the skills table in [README.md](../../README.md) and the [skills.sh](https://skills.sh/ravid7000/skills) catalog in [`skills.sh.json`](../../skills.sh.json), and commit both.
 8. **Open a PR** — CI runs the same validate + index-check steps automatically.
 
 ## Frontmatter Field Reference
@@ -127,8 +127,8 @@ description: Use for migrations — write the up/down scripts, run them in a tra
 ```bash
 npm install        # once, installs the frontmatter parser used by the scripts
 npm run validate    # checks every skill's frontmatter against the spec
-npm run index       # regenerates the README skills table
-npm run index:check # verifies the table is up to date without writing (used in CI)
+npm run index       # regenerates the README skills table and skills.sh.json
+npm run index:check # verifies both are up to date without writing (used in CI)
 ```
 
 `npm run validate` checks, per skill: required fields present, `name` format/length/directory match, `description` length, `metadata.category` present and drawn from the allowed vocabulary, `metadata.tagline` present and within length (and not a description in disguise), the presence of "When to Use" and "Do not use for" in the body, correct types for optional fields, and warns if the body exceeds ~500 lines.
@@ -140,11 +140,11 @@ npm run index:check # verifies the table is up to date without writing (used in 
 | `name` uses uppercase or underscores | Use lowercase letters, numbers, and hyphens only |
 | `name` doesn't match the directory | Rename one to match the other |
 | Description explains *how* the skill works step by step | Rewrite to describe only *when* to use it |
-| Forgetting to run `npm run index` after adding a skill | CI's `index:check` will fail the PR — run it locally and commit the diff |
+| Forgetting to run `npm run index` after adding a skill | CI's `index:check` will fail the PR — run it locally and commit the README and `skills.sh.json` diffs |
 | Dumping a 1000-line reference doc straight into `SKILL.md` | Move it to `references/` and link to it |
 | Inventing a new `metadata.category` value ad hoc | Pick one of the five, or propose adding one by editing `ALLOWED_CATEGORIES` and the Categories table together |
 | Reusing the description as the tagline | The tagline is human-facing copy — one sentence on what the skill does |
-| Hand-editing the Skills section of the README | It's generated from taglines; run `npm run index` |
+| Hand-editing the Skills section of the README or `skills.sh.json` | Both are generated from frontmatter; run `npm run index` |
 | Listing only when to use the skill | Add a "Do not use for" statement too; validation requires it |
 | Cross-referencing a skill that doesn't exist (or was renamed) | Only name skills present under `skills/` |
 
