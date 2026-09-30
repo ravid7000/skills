@@ -27,12 +27,46 @@ Prefer versioned installs, or using [agent-skills-cli](https://www.npmjs.com/pac
 <!-- SKILLS_INDEX_START -->
 | Skill | What it does |
 | --- | --- |
+| [**clean-code**](#clean-code) | Applies strict clean-code working rules to every coding task - structure, process, and output. |
+| [**clean-code-review**](#clean-code-review) | Reviews a diff in two passes and emits blunt, prefixed PR comments a reviewer can post as-is. |
 | [**creating-agent-skills**](#creating-agent-skills) | Authors and validates new skills so they load reliably and survive review. |
 | [**debug-flow**](#debug-flow) | Traces broken flows across any stack with temporary correlated logs, then tears them out. |
 | [**finder**](#finder) | Answers research questions from current, cited sources instead of model memory. |
 | [**handing-off-work**](#handing-off-work) | Writes a handoff a fresh agent can resume from — decisions, dead ends, and verified code state. |
 | [**instrumenting-for-observability**](#instrumenting-for-observability) | Adds logging, metrics, and tracing designed backwards from the questions an outage will ask. |
 | [**plan-with-me**](#plan-with-me) | Turns a vague request into an agreed, written plan by asking one grounded question at a time. |
+
+### clean-code
+
+`workflow` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/clean-code)
+
+Applies strict clean-code working rules to every coding task - structure, process, and output.
+
+```bash
+npx skills add ravid7000/skills --skill clean-code
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when writing, refactoring, or extending code in any repo and the user wants strict working rules applied throughout - no comments, one responsibility per unit, constants and types in their own files, reuse existing helpers before writing new ones, prefer the repo's utility and date libraries, no dead code or magic values, strict types, handled edge cases and errors, tests and lint always green, no mocking the module under test, ask instead of assume, verify library APIs against current docs, and surface decisions to the user. Code written under these rules passes the clean-code-review skill with no findings. Triggers on "follow clean-code rules", "write this cleanly", "apply the working rules", or any coding task where the user has opted into this convention.
+
+</details>
+
+### clean-code-review
+
+`workflow` · [Read the skill →](https://github.com/ravid7000/skills/tree/master/skills/clean-code-review)
+
+Reviews a diff in two passes and emits blunt, prefixed PR comments a reviewer can post as-is.
+
+```bash
+npx skills add ravid7000/skills --skill clean-code-review
+```
+
+<details><summary>When the agent loads it</summary>
+
+Use when the user asks to "review this PR", "review my diff", "check for clean-code violations", "comment on these changes", or wants structured review comments on existing code rather than new code written. Covers PR hygiene (constants/types split, single responsibility, comments, reuse, dead code, naming, magic values, scope creep, test hygiene) and code analysis (bug hunting, error handling, type looseness, performance smells, edge cases). Produces blunt prefixed review comments and can post them to GitHub on request.
+
+</details>
 
 ### creating-agent-skills
 
