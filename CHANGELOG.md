@@ -1,5 +1,13 @@
 # @ravid7000/skills
 
+## 0.5.0
+
+### Minor Changes
+
+- [#21](https://github.com/ravid7000/skills/pull/21) [`8744c0c`](https://github.com/ravid7000/skills/commit/8744c0c06c2b513cf1615ef801af77265fd4a395) Thanks [@ravid7000](https://github.com/ravid7000)! - Added `clean-code-review`, a two-pass PR review skill that reports hygiene and correctness findings as blunt prefixed comments and can post them to the PR on request.
+
+- [#21](https://github.com/ravid7000/skills/pull/21) [`8744c0c`](https://github.com/ravid7000/skills/commit/8744c0c06c2b513cf1615ef801af77265fd4a395) Thanks [@ravid7000](https://github.com/ravid7000)! - Added `clean-code`, a working-rules skill for writing and refactoring code: no comments, single responsibility, separated constants/types, reuse first, green tests and lint, and surfaced decisions.
+
 ## 0.4.1
 
 ### Patch Changes
